@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Biblioteca Online</title>
+</head>
+<body>
+
+<h1>Biblioteca Online</h1>
+
+<div id="conteudoPrincipal">
+
+  <!-- FIND -->
+  <div class="section">
+    <h2>Buscar Livros</h2>
+    <input type="text" id="titulo" placeholder="Título">
+    <input type="text" id="autor" placeholder="Autor">
+    <input type="text" id="genero" placeholder="Gênero">
+    <button id="btnFind">Buscar</button>
+    <ul id="resultadoFind"></ul>
+  </div>
+
+  <!-- CATEGORIAS / AGGREGATE -->
+  <div class="section">
+    <h2>Categorias</h2>
+    <button id="btnCategorias">Mostrar Categorias</button>
+    <ul id="resultadoCategorias"></ul>
+  </div>
+
+  <!-- BOTÃO PARA NOVO LIVRO -->
+  <div class="section">
+    <h2>Adicionar Novo Livro</h2>
+    <button id="btnNovoLivro">Novo Livro</button>
+  </div>
+</div>
+
+<script type="module" src="script.js"></script>
+</body>
+</html>
