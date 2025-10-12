@@ -1,0 +1,6 @@
+obs para helena:
+ao editar um cadastro, é obrigatório informar todos os campos.
+Tela de criar novo livro pode ser a mesma de editar, salvo que, quando editar, deve trazer todos os dados preenchidos.
+
+obs para livia:
+deve validar caso livro que está sendo criado já exista. Ou seja, se todos os dados informados são iguais a outro registro.
