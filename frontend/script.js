@@ -15,9 +15,11 @@ document.addEventListener("DOMContentLoaded", () => {
         livrosEncontrados.forEach(l => {
             const li = document.createElement("li");
             li.innerHTML = `
-                <strong>${l.titulo}</strong> — ${l.autor} (${l.ano})
-                <br>Disponíveis: ${l.exemplares}
                 <div>
+                    <strong>${l.titulo}</strong> — ${l.autor} (${l.ano})
+                    <br><span>Disponíveis: ${l.exemplares}</span>
+                </div>
+                <div class="bookActions">
                     <button class="btnReservar" data-titulo="${l.titulo}">Reservar</button>
                     <button class="btnDevolver" data-titulo="${l.titulo}">Devolver</button>
                     <button class="btnUpdate" data-titulo="${l.titulo}">Atualizar</button>
