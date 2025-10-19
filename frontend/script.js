@@ -1,5 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+    const API_URL = "http://localhost:3000";
+
     // --- FIND: Buscar livros ---
     document.getElementById("btnFind").addEventListener("click", async () => {
         const titulo = document.getElementById("titulo").value;
@@ -7,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const genero = document.getElementById("genero").value;
 
         const query = new URLSearchParams({ titulo, autor, genero });
-        const livrosEncontrados = await fetch(`/livros?${query}`).then(res => res.json());
+        const livrosEncontrados = await fetch(`${API_URL}/livros?${query}`).then(res => res.json());
 
         const resultadoFind = document.getElementById("resultadoFind");
         resultadoFind.innerHTML = "";
@@ -36,16 +38,18 @@ document.addEventListener("DOMContentLoaded", () => {
         const btn = e.target;
         const titulo = btn.dataset.titulo;
 
+        if (!titulo) return;
+
         // --- UPDATE ---
         if (btn.classList.contains("btnUpdate")) {
             const novaQtd = prompt(`Digite a nova quantidade de exemplares para "${titulo}":`);
             if (novaQtd !== null) {
-                const resultado = await fetch("/livros", {
+                const resultado = await fetch(`${API_URL}/livros`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ titulo, exemplares: Number(novaQtd) })
                 }).then(res => res.json());
-                console.log(resultado);
+                alert(resultado.mensagem);
             }
         }
 
@@ -53,12 +57,12 @@ document.addEventListener("DOMContentLoaded", () => {
         if (btn.classList.contains("btnRemove")) {
             const confirmar = confirm(`Deseja remover o livro "${titulo}"?`);
             if (confirmar) {
-                const resultado = await fetch("/livros", {
+                const resultado = await fetch(`${API_URL}/livros`, {
                     method: "DELETE",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ titulo })
                 }).then(res => res.json());
-                console.log(resultado);
+                alert(resultado.mensagem);
             }
         }
 
@@ -78,12 +82,12 @@ document.addEventListener("DOMContentLoaded", () => {
                     genero: novoGenero,
                     exemplares: Number(novoExemplares)
                 };
-                const resultado = await fetch("/livros/replace", {
+                const resultado = await fetch(`${API_URL}/livros/replace`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ titulo, novoLivro })
                 }).then(res => res.json());
-                console.log(resultado);
+                alert(resultado.mensagem);
             }
         }
 
@@ -91,7 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (btn.classList.contains("btnReservar")) {
             const nome = prompt("Informe seu nome para reservar este livro:");
             if (nome) {
-                const resultado = await fetch("/livros/emprestar", {
+                const resultado = await fetch(`${API_URL}/livros/emprestar`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ titulo, nomeUsuario: nome })
@@ -104,7 +108,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (btn.classList.contains("btnDevolver")) {
             const nome = prompt("Informe seu nome para devolver este livro:");
             if (nome) {
-                const resultado = await fetch("/livros/devolver", {
+                const resultado = await fetch(`${API_URL}/livros/devolver`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ titulo, nomeUsuario: nome })
@@ -119,12 +123,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const resultadoCategorias = document.getElementById("resultadoCategorias");
         resultadoCategorias.innerHTML = "";
 
-        const categorias = await fetch("/categorias").then(res => res.json());
+        const categorias = await fetch(`${API_URL}/categorias`).then(res => res.json());
 
         for (let genero of categorias) {
-            const qtd = await fetch(`/categorias/${genero}`).then(res => res.json());
             const li = document.createElement("li");
-            li.textContent = `${genero} — ${qtd} livros`;
+            li.textContent = genero;
             resultadoCategorias.appendChild(li);
         }
     });
@@ -152,7 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 genero: document.getElementById("novoGenero").value,
                 exemplares: Number(document.getElementById("novoExemplares").value)
             };
-            const resultado = await fetch("/livros", {
+            const resultado = await fetch(`${API_URL}/livros`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(novoLivro)

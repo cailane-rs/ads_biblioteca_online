@@ -1,74 +1,98 @@
-import dados from '../biblioteca.json' assert { type: 'json' };
+import { Livro } from "./livroModel.js";
 
-// Copia os dados do arquivo JSON (simula o banco de dados)
-let livros = [...dados];
-
-// FUNÇÕES DE LÓGICA 
-// (Cailane criou a estrutura, Livia tem que completar colocando os comando do banco dentro de cada método)
-
-// FIND: Listar livros por autor ou gênero
+// FIND
 export async function find({ titulo, autor, genero }) {
-    const filtro = {};
+  const filtro = {};
+  if (titulo) filtro.titulo = { $regex: titulo, $options: "i" };
+  if (autor) filtro.autor = { $regex: autor, $options: "i" };
+  if (genero) filtro.genero = { $regex: genero, $options: "i" };
 
-    if(titulo) filtro.titulo = titulo;
-    if(autor) filtro.autor = autor;
-    if(genero) filtro.genero = genero;
-
-    // deve retornar um array com os livros encontrados com base no objeto filtro
+  return await Livro.find(filtro);
 }
 
-// Retornar todas as categorias únicas
+// CATEGORIAS
 export async function getCategorias() {
-  // deve retornar um array com os nomes das categorias, usar DISTINCT
+  const categorias = await Livro.distinct("genero");
+  return categorias;
 }
 
-// AGGREGATE : Contar quantos livros existem por gênero
-export function aggregate(genero) {
-    // deve retornar um objeto com os gêneros como chave e a soma de exemplares como valor
+// AGGREGATE
+export async function aggregate(genero) {
+  const resultado = await Livro.aggregate([
+    { $match: { genero } },
+    { $group: { _id: "$genero", total: { $sum: "$exemplares" } } }
+  ]);
+  return resultado.length ? resultado[0].total : 0;
 }
 
-// INSERT : Adicionar novo livro
-export function insert(livro) {
-    //deve adicionar o objeto livro passado como parâmetro
-    // deve retornar uma mensagem confirmando a inserção do livro ou de falha
-    // deve validar se o livro já existe
-}
-
-// UPDATE : Atualizar quantidade de xemplares
-export function update({ titulo, exemplares }) {
-    // deve retornar mensagem de sucesso ou de falha
-}
-
-// DELETE : Remover livro
-export function remove({ titulo }) {
-  // deve retornar uma mensagem de sucesso ou de falha 
-}
-
-// REPLACE : Editar cadastro de um livro
-export function replace({ titulo, novoLivro }) {
-  // deve retornar uma mensagem de sucesso ou de falha 
-}
-
-// EMPRESTAR LIVRO
-export function emprestar(livro, nomeUsuario) {
-    if (livro.exemplares > 0) {
-        livro.emprestimos.push(nomeUsuario);
-        livro.exemplares -= 1;
-        return { sucesso: true, mensagem: `Livro reservado com sucesso por ${nomeUsuario}.` };
-    } else {
-        return { sucesso: false, mensagem: "Livro indisponível para empréstimo." };
+// INSERT
+export async function insert(livro) {
+  try {
+    const existente = await Livro.findOne({ titulo: livro.titulo });
+    if (existente) {
+      return { sucesso: false, mensagem: "Livro já cadastrado." };
     }
+    await Livro.create(livro);
+    return { sucesso: true, mensagem: "Livro inserido com sucesso!" };
+  } catch (error) {
+    return { sucesso: false, mensagem: "Erro ao inserir livro." };
+  }
 }
 
-// DEVOLVER LIVRO
-export function devolver(livro, nomeUsuario) {
-    const index = livro.emprestimos.indexOf(nomeUsuario);
+// UPDATE
+export async function update({ titulo, exemplares }) {
+  const resultado = await Livro.updateOne({ titulo }, { $set: { exemplares } });
+  if (resultado.matchedCount)
+    return { sucesso: true, mensagem: "Quantidade atualizada com sucesso!" };
+  else
+    return { sucesso: false, mensagem: "Livro não encontrado." };
+}
 
-    if (index !== -1) {
-        livro.emprestimos.splice(index, 1);
-        livro.exemplares += 1;
-        return { sucesso: true, mensagem: `${nomeUsuario} devolveu o livro com sucesso.` };
-    } else {
-        return { sucesso: false, mensagem: "Usuário não possui este livro emprestado." };
-    }
+// DELETE
+export async function remove({ titulo }) {
+  const resultado = await Livro.deleteOne({ titulo });
+  if (resultado.deletedCount)
+    return { sucesso: true, mensagem: "Livro removido com sucesso!" };
+  else
+    return { sucesso: false, mensagem: "Livro não encontrado." };
+}
+
+// REPLACE
+export async function replace({ titulo, novoLivro }) {
+  const resultado = await Livro.replaceOne({ titulo }, novoLivro);
+  if (resultado.matchedCount)
+    return { sucesso: true, mensagem: "Livro atualizado com sucesso!" };
+  else
+    return { sucesso: false, mensagem: "Livro não encontrado." };
+}
+
+// EMPRESTAR
+export async function emprestar({ titulo, nomeUsuario }) {
+  const livro = await Livro.findOne({ titulo });
+  if (!livro) return { sucesso: false, mensagem: "Livro não encontrado." };
+
+  if (livro.exemplares > 0) {
+    livro.emprestimos.push(nomeUsuario);
+    livro.exemplares -= 1;
+    await livro.save();
+    return { sucesso: true, mensagem: `Livro reservado com sucesso por ${nomeUsuario}.` };
+  } else {
+    return { sucesso: false, mensagem: "Livro indisponível para empréstimo." };
+  }
+}
+
+// DEVOLVER
+export async function devolver({ titulo, nomeUsuario }) {
+  const livro = await Livro.findOne({ titulo });
+  if (!livro) return { sucesso: false, mensagem: "Livro não encontrado." };
+
+  const index = livro.emprestimos.indexOf(nomeUsuario);
+  if (index !== -1) {
+    livro.emprestimos.splice(index, 1);
+    livro.exemplares += 1;
+    await livro.save();
+    return { sucesso: true, mensagem: `${nomeUsuario} devolveu o livro com sucesso.` };
+  } else {
+    return { sucesso: false, mensagem: "Usuário não possui este livro emprestado." };
+  }
 }
