@@ -1,6 +1,9 @@
 # Biblioteca Online
 
 Este projeto é um sistema simples de **gerenciamento de biblioteca online**, desenvolvido como trabalho de faculdade.
+<img width="1365" height="598" alt="image" src="https://github.com/user-attachments/assets/b987cbf4-fe1f-40ee-955e-a25fe15246f9" />
+<img width="1364" height="158" alt="image" src="https://github.com/user-attachments/assets/923f7617-1d93-4799-8a59-b8ae24613630" />
+
 
 ## Funcionalidades
 
